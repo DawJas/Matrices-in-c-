@@ -3,6 +3,7 @@
 #include <iomanip>
 #include <stdexcept>
 #include <chrono>
+
 using namespace std;
 
 Matrix::Matrix(int N, int M, double value = 0.0) {
@@ -36,7 +37,6 @@ double* Matrix::operator[](int i) {
 
 double* Matrix::matrixMultiply(double* Second) {
 
-	auto start = chrono::high_resolution_clock::now();
 	double* newMatrix = new double[this->getN()];
 	int imax = this->getN();
 	for (int i = 0; i < imax;i++) {
@@ -44,6 +44,19 @@ double* Matrix::matrixMultiply(double* Second) {
 		for (int j = 0; j < 1; j++) {
 			for (int k = 0; k < imax; k++) {
 				newMatrix[i] += (*this)[i][k] * Second[k];
+			}
+		}
+	}
+	return newMatrix;
+}
+
+Matrix trueMatrixMultiply(Matrix A, Matrix B) {
+
+	Matrix newMatrix = Matrix(A.getN(), B.getM(), 0.0);
+	for (int i = 0; i < A.getN(); i++) {
+		for (int j = 0; j < B.getM(); j++) {
+			for (int k = 0; k < A.getM(); k++) {
+				newMatrix[i][j] += A[i][k] * B[k][j];
 			}
 		}
 	}
@@ -207,6 +220,15 @@ double* forwardSubstitution(Matrix L, double* b) {
 	return y;
 }
 
+Matrix copyMatrix(Matrix A) {
+	Matrix newMatrix = Matrix(A.getN(), A.getM(), 0.0);
+	for (int i = 0; i < A.getN(); i++) {
+		for (int j = 0; j < A.getM(); j++) {
+			newMatrix[i][j] = A[i][j];
+		}
+	}
+	return newMatrix;
+}
 void Jacobi(Matrix A, double* b) {
 
 	int N = A.getN();
@@ -274,4 +296,18 @@ void GaussSeidl(Matrix A, double* b) {
 	auto difference = end - start;
 	cout << "Czas obliczen: " << chrono::duration<double, milli>(difference).count() << " ms" << endl;
 	cout << "Liczba iteracji: " << iterations << endl;
+}
+
+void LUFactorization(Matrix A, double* b) {
+	int N = A.getN();
+	Matrix U = copyMatrix(A);
+	Matrix L = Matrix(A.getN(), A.getM(), 0.0);
+	L.addDiagonal(1.0, MAIN_DIAGONAL);
+	for (int i = 0; i < N-1; i++) {
+		for (int j = i+1; j < N; j++) {
+			L[j][i] = U[j][i] / U[i][i];
+			U[j][i] = U[j][i] - L[j][i] * U[i][i]; 
+		}
+	}
+	print(trueMatrixMultiply(L,U));
 }

@@ -37,3 +37,4 @@ double norm(double* matrix, int N);
 void vectorSubstract(double* a, double* b, int N);
 void Jacobi(Matrix A, double* b);
 void GaussSeidl(Matrix A, double* b);
+void LUFactorization(Matrix A, double* b);
