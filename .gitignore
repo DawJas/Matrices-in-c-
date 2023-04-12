@@ -396,3 +396,9 @@ FodyWeavers.xsd
 
 # JetBrains Rider
 *.sln.iml
+Macierze/Macierze/Debug/Macierze.tlog/link.read.1.tlog
+Macierze/Macierze/Debug/Macierze.tlog/CL.read.1.tlog
+Macierze/Macierze/Debug/Macierze.tlog/CL.command.1.tlog
+Macierze/Macierze/Debug/Macierze.log
+*.tlog
+Macierze/Macierze/Debug/Macierze.tlog/CL.read.1.tlog
