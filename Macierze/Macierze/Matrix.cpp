@@ -2,6 +2,7 @@
 #include "Matrix.h"
 #include <iomanip>
 #include <stdexcept>
+#include <vector>
 #include <chrono>
 
 using namespace std;
@@ -234,6 +235,7 @@ void Jacobi(Matrix A, double* b) {
 	int N = A.getN();
 	double* r = new double[A.getN()];
 	double* res = new double[A.getN()];
+	vector<double> residuals;
 	for (int i = 0; i < A.getN(); i++) {
 		r[i] = 1.0;
 		res[i] = 0.0;
@@ -245,7 +247,7 @@ void Jacobi(Matrix A, double* b) {
 	Dinv = Dinv - Dinv - Dinv;
 	double residual = 0.0;
 	int iterations = 0;
-	cout << "Zaczynam" << endl;
+	cout << endl;
 	auto start = chrono::high_resolution_clock::now();
 
 	do {
@@ -256,18 +258,20 @@ void Jacobi(Matrix A, double* b) {
 		vectorSubstract(res, b, N);
 		residual = norm(res, N);
 		iterations++;
-	} while (residual > 10e-9);
+		residuals.push_back(residual);
+	} while (residual > 1e-9);
 
 	auto end = chrono::high_resolution_clock::now();
 	auto difference = end - start;
-	cout << "Czas obliczen: " << chrono::duration<double, milli>(difference).count() <<  " ms" << endl;
-	cout << "Liczba iteracji: " << iterations << endl;
+	cout << "Czas obliczen Jacobi: " << chrono::duration<double, milli>(difference).count() <<  " ms" << endl;
+	cout << "Liczba iteracji Jacobi : " << iterations << endl;
 }
 
 void GaussSeidl(Matrix A, double* b) {
 	int N = A.getN();
 	double* r = new double[A.getN()];
 	double* res = new double[A.getN()];
+	vector<double> residuals;
 	for (int i = 0; i < A.getN(); i++) {
 		r[i] = 1.0;
 		res[i] = 0.0;
@@ -279,7 +283,7 @@ void GaussSeidl(Matrix A, double* b) {
 	DL = DL - DL - DL;
 	double residual = 0.0;
 	int iterations = 0;
-	cout << "Zaczynam" << endl;
+	cout << endl;
 	auto start = chrono::high_resolution_clock::now();
 
 	do {
@@ -290,24 +294,33 @@ void GaussSeidl(Matrix A, double* b) {
 		vectorSubstract(res, b, N);
 		residual = norm(res, N);
 		iterations++;
-	} while (residual > 10e-9);
+		residuals.push_back(residual);
+	} while (residual > 1e-9);
 
 	auto end = chrono::high_resolution_clock::now();
 	auto difference = end - start;
-	cout << "Czas obliczen: " << chrono::duration<double, milli>(difference).count() << " ms" << endl;
-	cout << "Liczba iteracji: " << iterations << endl;
+	cout << "Czas obliczen Gauss-Seild: " << chrono::duration<double, milli>(difference).count() << " ms" << endl;
+	cout << "Liczba iteracji Gauss-Seidl: " << iterations << endl;
 }
 
 void LUFactorization(Matrix A, double* b) {
+	auto start = chrono::high_resolution_clock::now();
 	int N = A.getN();
 	Matrix U = copyMatrix(A);
 	Matrix L = Matrix(A.getN(), A.getM(), 0.0);
 	L.addDiagonal(1.0, MAIN_DIAGONAL);
+
 	for (int i = 0; i < N-1; i++) {
 		for (int j = i+1; j < N; j++) {
 			L[j][i] = U[j][i] / U[i][i];
 			U[j][i] = U[j][i] - L[j][i] * U[i][i]; 
 		}
 	}
-	print(trueMatrixMultiply(L,U));
+
+	cout << norm(trueMatrixMultiply(L,U) * b, N);
+
+	auto end = chrono::high_resolution_clock::now();
+	auto difference = end - start;
+	cout << endl << "Czas obliczen LU: " << chrono::duration<double, milli>(difference).count() << " ms" << endl;
+	//print(trueMatrixMultiply(L,U));
 }
