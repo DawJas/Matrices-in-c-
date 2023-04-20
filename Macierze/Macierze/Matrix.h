@@ -24,6 +24,7 @@ public:
 	Matrix Transpose();
 	void addDiagonal(double value, int diagonal);
 	void freeNumbers();
+	void memoryMatrixMultiply(double* Second);
 
 };
 Matrix Diagonal(int N, double value, int diagonal);
@@ -35,6 +36,7 @@ void print(Matrix matrix);
 void init(int precision);
 double norm(double* matrix, int N);
 void vectorSubstract(double* a, double* b, int N);
-void Jacobi(Matrix A, double* b);
-void GaussSeidl(Matrix A, double* b);
+void Jacobi(Matrix A, double* b, int error);
+void GaussSeidl(Matrix A, double* b, int error);
 void LUFactorization(Matrix A, double* b);
+void clearFiles();

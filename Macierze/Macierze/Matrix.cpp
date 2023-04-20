@@ -3,6 +3,8 @@
 #include <iomanip>
 #include <stdexcept>
 #include <vector>
+#include <fstream>
+#include <string>
 #include <chrono>
 
 using namespace std;
@@ -42,13 +44,25 @@ double* Matrix::matrixMultiply(double* Second) {
 	int imax = this->getN();
 	for (int i = 0; i < imax;i++) {
 		newMatrix[i] = 0.0;
-		for (int j = 0; j < 1; j++) {
 			for (int k = 0; k < imax; k++) {
 				newMatrix[i] += (*this)[i][k] * Second[k];
 			}
-		}
 	}
 	return newMatrix;
+}
+
+void Matrix::memoryMatrixMultiply(double* Second) {
+
+	double* newMatrix = new double[this->getN()];
+	int imax = this->getN();
+	for (int i = 0; i < imax; i++) {
+		newMatrix[i] = 0.0;
+		for (int k = 0; k < imax; k++) {
+			newMatrix[i] += (*this)[i][k] * Second[k];
+		}
+	}
+	for (int i = 0; i < imax; i++) Second[i] = newMatrix[i];
+	delete[] newMatrix;
 }
 
 Matrix trueMatrixMultiply(Matrix A, Matrix B) {
@@ -135,6 +149,48 @@ void print(Matrix matrix) {
 	cout << endl;
 }
 
+void clearFiles() {
+	string FileName = "GaussCzas.csv";
+	fstream FileStream;
+	FileStream.open(FileName, ios::out);
+	FileStream.close();
+
+	FileName = "JacobiCzas.csv";
+	FileStream;
+	FileStream.open(FileName, ios::out);
+	FileStream.close();
+
+	FileName = "LUCzas.csv";
+	FileStream;
+	FileStream.open(FileName, ios::out);
+	FileStream.close();
+
+	FileName = "Rozmiary.csv";
+	FileStream;
+	FileStream.open(FileName, ios::out);
+	FileStream.close();
+
+	FileName = "resBGauss.csv";
+	FileStream;
+	FileStream.open(FileName, ios::out);
+	FileStream.close();
+
+	FileName = "resCGauss.csv";
+	FileStream;
+	FileStream.open(FileName, ios::out);
+	FileStream.close();
+
+	FileName = "resBJacobi.csv";
+	FileStream;
+	FileStream.open(FileName, ios::out);
+	FileStream.close();
+
+	FileName = "resCJacobi.csv";
+	FileStream;
+	FileStream.open(FileName, ios::out);
+	FileStream.close();
+}
+
 //positive numbers shift to right, negative to the the left, 0 is the main diagonal
 Matrix Diagonal(int N, double value, int diagonal) { 
 	Matrix newMatrix = Matrix(N, N, 0.0);
@@ -188,9 +244,9 @@ void init(int precision) {
 }
 void Matrix::freeNumbers() {
 	for (int i = 0; i < getN(); i++) {
-		free(numbers[i]);
+		delete[](numbers[i]);
 	}
-	free(numbers);
+	delete[](numbers);
 }
 
 double norm(double* matrix, int N) {
@@ -206,7 +262,7 @@ void vectorSubstract(double* a, double* b, int N) {
 	for (int i = 0; i < N; i++) a[i] = a[i] - b[i];
 }
 
-double* forwardSubstitution(Matrix L, double* b) {
+double* forwardSubstitution(Matrix L, double* b, bool clear) {
 	double* y = new double[L.getN()];
 	for (int i = 0; i < L.getN(); i++) y[i] = 1.0;
 	double S = 0;
@@ -217,7 +273,22 @@ double* forwardSubstitution(Matrix L, double* b) {
 		}
 		y[i] = (b[i] - S) / L[i][i];
 	}
-	free(b);
+	if(clear)delete[](b);
+	return y;
+}
+
+double* bakcwardSubstitution(Matrix U, double* b, bool clear) {
+	int N = U.getN();
+	double* y = new double[U.getN()];
+	for (int i = N - 1; i >= 0; --i)
+	{
+		double S = 0;
+
+		for (int j = i + 1; j < N; ++j) S += U[i][j] * y[j];
+
+		y[i] = (b[i] - S) / U[i][i];
+	}
+	if(clear) delete[](b);
 	return y;
 }
 
@@ -230,15 +301,12 @@ Matrix copyMatrix(Matrix A) {
 	}
 	return newMatrix;
 }
-void Jacobi(Matrix A, double* b) {
+void Jacobi(Matrix A, double* b, int error) {
 
 	int N = A.getN();
 	double* r = new double[A.getN()];
-	double* res = new double[A.getN()];
-	vector<double> residuals;
 	for (int i = 0; i < A.getN(); i++) {
 		r[i] = 1.0;
-		res[i] = 0.0;
 	}
 	Matrix D = getMainDiagonal(A);
 	Matrix L = Lower(A);
@@ -247,60 +315,110 @@ void Jacobi(Matrix A, double* b) {
 	Dinv = Dinv - Dinv - Dinv;
 	double residual = 0.0;
 	int iterations = 0;
+	vector<double> residuals;
 	cout << endl;
 	auto start = chrono::high_resolution_clock::now();
-
+	Matrix LU = L + U;
 	do {
-		r = ((L + U) * r);
+		r = (LU * r);
 		vectorSubstract(r, b, N);
-		r = Dinv * r;
-		res = A * r;
+		Dinv.memoryMatrixMultiply(r);
+		double* res = A * r;
 		vectorSubstract(res, b, N);
 		residual = norm(res, N);
 		iterations++;
 		residuals.push_back(residual);
-	} while (residual > 1e-9);
+		delete[] res;
+	} while (residual > 1e-9 && residual < 1e+30);
 
 	auto end = chrono::high_resolution_clock::now();
 	auto difference = end - start;
 	cout << "Czas obliczen Jacobi: " << chrono::duration<double, milli>(difference).count() <<  " ms" << endl;
 	cout << "Liczba iteracji Jacobi : " << iterations << endl;
+	cout << "Norma bledu rezydualnego Jacobi: " << residual << endl;
+
+	string FileName = "JacobiCzas.csv";
+	fstream FileStream;
+	FileStream.open(FileName, ios_base::app);
+	FileStream << chrono::duration<double, milli>(difference).count() << endl;
+	FileStream.close();
+
+
+	if (error) {
+		if (error == 1) {
+			FileName = "resBJacobi.csv";
+		}
+		else FileName = "resCJacobi.csv";
+		FileStream.open(FileName, ios_base::app);
+		for (int i = 0; i < residuals.size(); i++) {
+			FileStream << residuals[i] << endl;
+		}
+		FileStream.close();
+	}
+
+
+	delete[] (r);
 }
 
-void GaussSeidl(Matrix A, double* b) {
+void GaussSeidl(Matrix A, double* b, int error) {
 	int N = A.getN();
 	double* r = new double[A.getN()];
-	double* res = new double[A.getN()];
-	vector<double> residuals;
 	for (int i = 0; i < A.getN(); i++) {
 		r[i] = 1.0;
-		res[i] = 0.0;
 	}
 	Matrix D = getMainDiagonal(A);
 	Matrix L = Lower(A);
 	Matrix U = Upper(A);
 	Matrix DL = D + L;
 	DL = DL - DL - DL;
+	vector<double> residuals;
 	double residual = 0.0;
 	int iterations = 0;
 	cout << endl;
 	auto start = chrono::high_resolution_clock::now();
 
 	do {
-		r = (U * r);
+		U.memoryMatrixMultiply(r);
 		vectorSubstract(r, b, N);
-		r = forwardSubstitution(DL, r);
-		res = A * r;
+		r = forwardSubstitution(DL, r,true);
+		double* res = A * r;
 		vectorSubstract(res, b, N);
 		residual = norm(res, N);
-		iterations++;
 		residuals.push_back(residual);
-	} while (residual > 1e-9);
+		iterations++;
+		delete[] res;
+	} while (residual > 1e-9 && residual < 1e+30);
 
 	auto end = chrono::high_resolution_clock::now();
 	auto difference = end - start;
 	cout << "Czas obliczen Gauss-Seild: " << chrono::duration<double, milli>(difference).count() << " ms" << endl;
 	cout << "Liczba iteracji Gauss-Seidl: " << iterations << endl;
+	cout << "Norma bledu rezydualnego Gauss-Seidl: " << residual << endl;
+
+	string FileName = "GaussCzas.csv";
+	fstream FileStream;
+	FileStream.open(FileName, ios_base::app);
+	FileStream << chrono::duration<double, milli>(difference).count() << endl;
+	FileStream.close();
+
+	if (error) {
+		if (error == 1) {
+			FileName = "resBGauss.csv";
+		}
+		else FileName = "resCGauss.csv";
+
+		FileStream.open(FileName, ios_base::app);
+		for (int i = 0; i < residuals.size(); i++) {
+			FileStream << residuals[i] << endl;
+		}
+		FileStream.close();
+	}
+
+	L.freeNumbers();
+	D.freeNumbers();
+	U.freeNumbers();
+	DL.freeNumbers();
+	delete[] (r);
 }
 
 void LUFactorization(Matrix A, double* b) {
@@ -310,17 +428,33 @@ void LUFactorization(Matrix A, double* b) {
 	Matrix L = Matrix(A.getN(), A.getM(), 0.0);
 	L.addDiagonal(1.0, MAIN_DIAGONAL);
 
-	for (int i = 0; i < N-1; i++) {
-		for (int j = i+1; j < N; j++) {
+	for (int i = 0; i < N - 1; ++i)		//columns
+	{
+		for (int j = i + 1; j < N; ++j)	//rows
+		{
 			L[j][i] = U[j][i] / U[i][i];
-			U[j][i] = U[j][i] - L[j][i] * U[i][i]; 
+
+			for (int k = i; k < N; ++k)
+				U[j][k] = U[j][k] - L[j][i] * U[i][k];
 		}
 	}
 
-	cout << norm(trueMatrixMultiply(L,U) * b, N);
+	double* y = forwardSubstitution(L, b, false);
+	double* x = bakcwardSubstitution(U, y, true);
+	double* temp = A * x;
+	vectorSubstract(temp, b, N);
 
 	auto end = chrono::high_resolution_clock::now();
 	auto difference = end - start;
 	cout << endl << "Czas obliczen LU: " << chrono::duration<double, milli>(difference).count() << " ms" << endl;
-	//print(trueMatrixMultiply(L,U));
+	cout << "Norma bledu rezydualnego LU: " << norm(temp, N) << endl;
+
+	string FileName = "LUCzas.csv";
+	fstream FileStream;
+	FileStream.open(FileName, ios_base::app);
+	FileStream << chrono::duration<double, milli>(difference).count() << endl;
+	FileStream.close();
+
+	delete[] (x);
+	delete[] (temp);
 }
