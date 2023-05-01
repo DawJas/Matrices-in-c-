@@ -20,14 +20,11 @@ int main() {
 	A.addDiagonal(-1.0, 2);
 	double* b = bVector(Size);
 
-	GaussSeidl(A, b, 0);
-	Jacobi(A, b, 0);
+	GaussSeidl(A, b, 1, 0);
+	Jacobi(A, b, 1, 0);
 	A.freeNumbers();
 
-
 	cout << endl << "---------------ZADANIE C---------------" << endl;
-
-
 
 	A = Matrix(Size, Size, 0.0);
 	A.addDiagonal(3, MAIN_DIAGONAL);
@@ -35,14 +32,13 @@ int main() {
 	A.addDiagonal(-1.0, -2);
 	A.addDiagonal(-1.0, 1);
 	A.addDiagonal(-1.0, 2);
-
-	GaussSeidl(A, b, 0);
-	Jacobi(A, b, 0);
-
+	 
+	GaussSeidl(A, b, 2, 0);
+	Jacobi(A, b, 2, 0);
 
 	cout << endl << "---------------ZADANIE D---------------" << endl;
 
-	LUFactorization(A, b);
+	LUFactorization(A, b, 0);
 
 	for (int i = 0; i < sizeof(N) / sizeof(int); i++) {
 
@@ -62,9 +58,9 @@ int main() {
 
 		cout << endl << "-------------------Matrix size: " << N[i] << "-------------------" << endl;
 
-		GaussSeidl(A, b,0);
-		Jacobi(A, b,0);
-		LUFactorization(A, b);
+		GaussSeidl(A, b, 0, 1);
+		Jacobi(A, b, 0, 1);
+		LUFactorization(A, b, 1);
 		A.freeNumbers();
 		delete[](b);
 

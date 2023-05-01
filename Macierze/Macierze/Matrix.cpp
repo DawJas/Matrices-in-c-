@@ -301,7 +301,7 @@ Matrix copyMatrix(Matrix A) {
 	}
 	return newMatrix;
 }
-void Jacobi(Matrix A, double* b, int error) {
+void Jacobi(Matrix A, double* b, int error, int time) {
 
 	int N = A.getN();
 	double* r = new double[A.getN()];
@@ -337,13 +337,16 @@ void Jacobi(Matrix A, double* b, int error) {
 	cout << "Liczba iteracji Jacobi : " << iterations << endl;
 	cout << "Norma bledu rezydualnego Jacobi: " << residual << endl;
 
-	string FileName = "JacobiCzas.csv";
+	string FileName;
 	fstream FileStream;
-	FileStream.open(FileName, ios_base::app);
-	FileStream << chrono::duration<double, milli>(difference).count() << endl;
-	FileStream.close();
+	if (time) {
+		FileName = "JacobiCzas.csv";
+		FileStream;
+		FileStream.open(FileName, ios_base::app);
+		FileStream << chrono::duration<double, milli>(difference).count() << endl;
+		FileStream.close();
 
-
+	}
 	if (error) {
 		if (error == 1) {
 			FileName = "resBJacobi.csv";
@@ -360,7 +363,7 @@ void Jacobi(Matrix A, double* b, int error) {
 	delete[] (r);
 }
 
-void GaussSeidl(Matrix A, double* b, int error) {
+void GaussSeidl(Matrix A, double* b, int error, int time) {
 	int N = A.getN();
 	double* r = new double[A.getN()];
 	for (int i = 0; i < A.getN(); i++) {
@@ -394,13 +397,16 @@ void GaussSeidl(Matrix A, double* b, int error) {
 	cout << "Czas obliczen Gauss-Seild: " << chrono::duration<double, milli>(difference).count() << " ms" << endl;
 	cout << "Liczba iteracji Gauss-Seidl: " << iterations << endl;
 	cout << "Norma bledu rezydualnego Gauss-Seidl: " << residual << endl;
-
-	string FileName = "GaussCzas.csv";
 	fstream FileStream;
-	FileStream.open(FileName, ios_base::app);
-	FileStream << chrono::duration<double, milli>(difference).count() << endl;
-	FileStream.close();
+	string FileName;
 
+	if (time) {
+		FileName = "GaussCzas.csv";
+		FileStream;
+		FileStream.open(FileName, ios_base::app);
+		FileStream << chrono::duration<double, milli>(difference).count() << endl;
+		FileStream.close();
+	}
 	if (error) {
 		if (error == 1) {
 			FileName = "resBGauss.csv";
@@ -421,7 +427,7 @@ void GaussSeidl(Matrix A, double* b, int error) {
 	delete[] (r);
 }
 
-void LUFactorization(Matrix A, double* b) {
+void LUFactorization(Matrix A, double* b, int time) {
 	auto start = chrono::high_resolution_clock::now();
 	int N = A.getN();
 	Matrix U = copyMatrix(A);
@@ -448,13 +454,13 @@ void LUFactorization(Matrix A, double* b) {
 	auto difference = end - start;
 	cout << endl << "Czas obliczen LU: " << chrono::duration<double, milli>(difference).count() << " ms" << endl;
 	cout << "Norma bledu rezydualnego LU: " << norm(temp, N) << endl;
-
-	string FileName = "LUCzas.csv";
-	fstream FileStream;
-	FileStream.open(FileName, ios_base::app);
-	FileStream << chrono::duration<double, milli>(difference).count() << endl;
-	FileStream.close();
-
+	if (time) {
+		string FileName = "LUCzas.csv";
+		fstream FileStream;
+		FileStream.open(FileName, ios_base::app);
+		FileStream << chrono::duration<double, milli>(difference).count() << endl;
+		FileStream.close();
+	}
 	delete[] (x);
 	delete[] (temp);
 }

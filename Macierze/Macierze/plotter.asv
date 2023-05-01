@@ -1,0 +1,62 @@
+clear all
+close all
+JacobiCzas = csvread("JacobiCzas.csv");
+GaussCzas = csvread("GaussCzas.csv");
+LUCzas = csvread("LUCzas.csv");
+Rozmiary = csvread("Rozmiary.csv");
+resBJacobi = csvread("resBJacobi.csv");
+resBGauss = csvread ("resBGauss.csv");
+resCJacobi = csvread("resCJacobi.csv");
+resCGauss = csvread("resCGauss.csv");
+
+
+figure("Name","Metoda LU",'NumberTitle','off');
+semilogy(Rozmiary, LUCzas);
+ylabel("Czas rozwiązania [ms]");
+xlabel("Rozmiar macierzy");
+title("Czas rozwiazania rownania macierzowego metoda LU");
+
+figure("Name","Metoda LU",'NumberTitle','off');
+semilogy(Rozmiary, LUCzas);
+ylabel("Czas rozwiązania [ms]");
+xlabel("Rozmiar macierzy");
+title("Czas rozwiazania rownania macierzowego metoda LU");
+plot(Rozmiary, JacobiCzas);
+% saveas(gcf, 'Jacobi_Czas.png');
+legend("LU", "Gauss", "Jacobi");
+
+%%%%%%%%%% NORMY BLEDOW %%%%%%%%%%%
+figure("Name","Normy bledow rezydualnych",'NumberTitle','off');
+semilogy(resBJacobi);
+ylabel("Norma bledu reydualnego");
+xlabel("nr iteracji");
+title("Norma bledu rezydualnego");
+hold on
+% saveas(gcf, 'res_B_Jacobi.png');
+% 
+% 
+% figure("Name","Metoda Jacobiego",'NumberTitle','off');
+semilogy(resBGauss);
+legend("Jacobi", "Gauss");
+% ylabel("Norma bledu reydualnego");
+% xlabel("nr iteracji");
+% title("Norma bledu resydualnego dla metody Gaussa w zad B");
+% saveas(gcf, 'res_B_Gauss.png');
+% 
+
+%%%%% NORMY BLEDOW NIEZBIEZNYCH %%%%%%
+
+figure("Name","Normy bledow rezydualnych",'NumberTitle','off');
+semilogy(resCJacobi);
+ylabel("Norma bledu reydualnego");
+xlabel("nr iteracji");
+title("Norma bledu resydualnego dla metody Jacobiego w zad C");
+%saveas(gcf, 'res_C_Jacobi.png');
+hold on
+%figure("Name","Metoda Jacobiego",'NumberTitle','off');
+semilogy(resCGauss);
+%ylabel("Norma bledu reydualnego");
+%xlabel("nr iteracji");
+%title("Norma bledu resydualnego dla metody Gaussa w zad C");
+%saveas(gcf, 'res_C_Gauss.png');
+legend("Jacobi", "Gauss");

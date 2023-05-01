@@ -1,4 +1,4 @@
 ﻿  Matrix.cpp
-C:\Users\Acer\Desktop\Macierze Folder\Matrices-in-c-\Macierze\Macierze\Matrix.cpp(353,21): warning C4018: '<': signed/unsigned mismatch
-C:\Users\Acer\Desktop\Macierze Folder\Matrices-in-c-\Macierze\Macierze\Matrix.cpp(411,21): warning C4018: '<': signed/unsigned mismatch
+C:\Users\Acer\Desktop\Macierze Folder\Matrices-in-c-\Macierze\Macierze\Matrix.cpp(356,21): warning C4018: '<': signed/unsigned mismatch
+C:\Users\Acer\Desktop\Macierze Folder\Matrices-in-c-\Macierze\Macierze\Matrix.cpp(417,21): warning C4018: '<': signed/unsigned mismatch
   Macierze.vcxproj -> C:\Users\Acer\Desktop\Macierze Folder\Matrices-in-c-\Macierze\Debug\Macierze.exe
